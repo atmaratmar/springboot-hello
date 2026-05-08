@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'  // Assuming Maven is configured in Jenkins
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -27,6 +23,12 @@ pipeline {
         stage('Package') {
             steps {
                 sh 'mvn package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t springboot-hello .'
             }
         }
     }
