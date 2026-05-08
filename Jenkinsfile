@@ -44,12 +44,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        always {
-            echo 'Archiving test results and JAR file'
-            junit 'target/surefire-reports/*.xml'
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-        }
-    }
 }
