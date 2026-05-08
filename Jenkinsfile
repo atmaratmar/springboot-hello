@@ -1,31 +1,37 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
-                echo 'Checking out source code from SCM'
+                echo 'Checking out source code from GitHub'
                 checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                echo 'Compiling the Spring Boot application'
+                echo 'Compiling Spring Boot app'
                 sh 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                echo 'Running unit tests'
+                echo 'Running tests'
                 sh 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
-                echo 'Packaging the application into JAR'
+                echo 'Packaging JAR'
                 sh 'mvn package -DskipTests'
             }
         }
@@ -33,15 +39,25 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image'
+                sh 'docker --version'
                 sh 'docker build -t springboot-hello .'
             }
         }
 
         stage('Deploy to Nexus') {
             steps {
-                echo 'Deploying snapshot to local Nexus'
+                echo 'Deploying to Nexus'
                 sh 'mvn deploy -DskipTests'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'BUILD SUCCESS ✔'
+        }
+        failure {
+            echo 'BUILD FAILED ❌'
         }
     }
 }
