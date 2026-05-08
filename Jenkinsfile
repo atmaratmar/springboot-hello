@@ -8,7 +8,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = "springboot-hello"
-        MAVEN_IMAGE = "maven:3.9.6-eclipse-temurin-17"
     }
 
     stages {
@@ -21,12 +20,6 @@ pipeline {
         }
 
         stage('Build') {
-            agent {
-                docker {
-                    image "${MAVEN_IMAGE}"
-                    args '-v /root/.m2:/root/.m2'
-                }
-            }
             steps {
                 echo 'Compiling Spring Boot app'
                 sh 'mvn clean compile'
@@ -34,12 +27,6 @@ pipeline {
         }
 
         stage('Test') {
-            agent {
-                docker {
-                    image "${MAVEN_IMAGE}"
-                    args '-v /root/.m2:/root/.m2'
-                }
-            }
             steps {
                 echo 'Running tests'
                 sh 'mvn test'
@@ -47,12 +34,6 @@ pipeline {
         }
 
         stage('Package') {
-            agent {
-                docker {
-                    image "${MAVEN_IMAGE}"
-                    args '-v /root/.m2:/root/.m2'
-                }
-            }
             steps {
                 echo 'Packaging JAR'
                 sh 'mvn package -DskipTests'
@@ -65,24 +46,15 @@ pipeline {
 
                 sh '''
                     docker --version
-                    docker build -t ${IMAGE_NAME}:latest .
+                    docker build -t springboot-hello:latest .
                 '''
             }
         }
 
         stage('Deploy to Nexus') {
-            agent {
-                docker {
-                    image "${MAVEN_IMAGE}"
-                    args '-v /root/.m2:/root/.m2'
-                }
-            }
             steps {
                 echo 'Deploying artifact to Nexus'
-
-                sh '''
-                    mvn deploy -DskipTests
-                '''
+                sh 'mvn deploy -DskipTests'
             }
         }
     }
@@ -97,7 +69,6 @@ pipeline {
         }
 
         always {
-            echo 'Cleaning workspace'
             cleanWs()
         }
     }
