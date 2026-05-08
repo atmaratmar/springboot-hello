@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "springboot-hello"
+        MAVEN_IMAGE = "maven:3.9.6-eclipse-temurin-17"
     }
 
     stages {
@@ -22,21 +23,39 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Compiling Spring Boot app'
-                sh 'mvn clean compile'
+                sh """
+                    docker run --rm \
+                    -v \$PWD:/app \
+                    -v \$HOME/.m2:/root/.m2 \
+                    -w /app \
+                    ${MAVEN_IMAGE} mvn clean compile
+                """
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests'
-                sh 'mvn test'
+                sh """
+                    docker run --rm \
+                    -v \$PWD:/app \
+                    -v \$HOME/.m2:/root/.m2 \
+                    -w /app \
+                    ${MAVEN_IMAGE} mvn test
+                """
             }
         }
 
         stage('Package') {
             steps {
                 echo 'Packaging JAR'
-                sh 'mvn package -DskipTests'
+                sh """
+                    docker run --rm \
+                    -v \$PWD:/app \
+                    -v \$HOME/.m2:/root/.m2 \
+                    -w /app \
+                    ${MAVEN_IMAGE} mvn package -DskipTests
+                """
             }
         }
 
@@ -54,7 +73,13 @@ pipeline {
         stage('Deploy to Nexus') {
             steps {
                 echo 'Deploying artifact to Nexus'
-                sh 'mvn deploy -DskipTests'
+                sh """
+                    docker run --rm \
+                    -v \$PWD:/app \
+                    -v \$HOME/.m2:/root/.m2 \
+                    -w /app \
+                    ${MAVEN_IMAGE} mvn deploy -DskipTests
+                """
             }
         }
     }
