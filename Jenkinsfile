@@ -36,6 +36,13 @@ pipeline {
                 sh 'docker build -t springboot-hello .'
             }
         }
+
+        stage('Deploy to Nexus') {
+            steps {
+                echo 'Deploying snapshot to local Nexus'
+                sh 'mvn deploy -DskipTests'
+            }
+        }
     }
 
     post {
