@@ -19,10 +19,11 @@ pipeline {
             }
         }
 
-        stage('Debug') {
+        stage('Debug Workspace') {
             steps {
                 sh '''
-                    echo "WORKSPACE:"
+                    echo "WORKSPACE INFO:"
+                    echo $WORKSPACE
                     pwd
                     ls -la
                     find . -name pom.xml
@@ -34,8 +35,8 @@ pipeline {
             steps {
                 sh """
                     docker run --rm \
-                    -v /var/jenkins_home/workspace/springboot-hello:/workspace \
-                    -v /var/jenkins_home/.m2:/root/.m2 \
+                    -v \$WORKSPACE:/workspace \
+                    -v \$HOME/.m2:/root/.m2 \
                     -w /workspace \
                     ${MAVEN_IMAGE} mvn clean compile
                 """
@@ -46,8 +47,8 @@ pipeline {
             steps {
                 sh """
                     docker run --rm \
-                    -v /var/jenkins_home/workspace/springboot-hello:/workspace \
-                    -v /var/jenkins_home/.m2:/root/.m2 \
+                    -v \$WORKSPACE:/workspace \
+                    -v \$HOME/.m2:/root/.m2 \
                     -w /workspace \
                     ${MAVEN_IMAGE} mvn test
                 """
@@ -58,8 +59,8 @@ pipeline {
             steps {
                 sh """
                     docker run --rm \
-                    -v /var/jenkins_home/workspace/springboot-hello:/workspace \
-                    -v /var/jenkins_home/.m2:/root/.m2 \
+                    -v \$WORKSPACE:/workspace \
+                    -v \$HOME/.m2:/root/.m2 \
                     -w /workspace \
                     ${MAVEN_IMAGE} mvn package -DskipTests
                 """
@@ -68,9 +69,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                    docker build -t springboot-hello:latest .
-                '''
+                sh """
+                    docker build -t ${IMAGE_NAME}:latest .
+                """
             }
         }
 
@@ -78,8 +79,8 @@ pipeline {
             steps {
                 sh """
                     docker run --rm \
-                    -v /var/jenkins_home/workspace/springboot-hello:/workspace \
-                    -v /var/jenkins_home/.m2:/root/.m2 \
+                    -v \$WORKSPACE:/workspace \
+                    -v \$HOME/.m2:/root/.m2 \
                     -w /workspace \
                     ${MAVEN_IMAGE} mvn deploy -DskipTests
                 """
