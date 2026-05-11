@@ -23,10 +23,10 @@ pipeline {
         stage('Debug Workspace') {
             steps {
                 sh '''
-                    echo "Workspace structure:"
+                    echo "=== WORKSPACE INFO ==="
                     pwd
                     ls -la
-                    echo "Finding pom.xml:"
+                    echo "=== FIND POM ==="
                     find . -name pom.xml
                 '''
             }
@@ -39,7 +39,7 @@ pipeline {
                     docker run --rm \
                     -v \$WORKSPACE:/workspace \
                     -v \$HOME/.m2:/root/.m2 \
-                    -w /workspace/springboot-hello \
+                    -w /workspace \
                     ${MAVEN_IMAGE} mvn clean compile
                 """
             }
@@ -52,7 +52,7 @@ pipeline {
                     docker run --rm \
                     -v \$WORKSPACE:/workspace \
                     -v \$HOME/.m2:/root/.m2 \
-                    -w /workspace/springboot-hello \
+                    -w /workspace \
                     ${MAVEN_IMAGE} mvn test
                 """
             }
@@ -65,7 +65,7 @@ pipeline {
                     docker run --rm \
                     -v \$WORKSPACE:/workspace \
                     -v \$HOME/.m2:/root/.m2 \
-                    -w /workspace/springboot-hello \
+                    -w /workspace \
                     ${MAVEN_IMAGE} mvn package -DskipTests
                 """
             }
@@ -81,14 +81,14 @@ pipeline {
             }
         }
 
-        stage('Deploy to Nexus') {
+        stage('Deploy to Nexus (Maven)') {
             steps {
-                echo 'Deploying artifact to Nexus'
+                echo 'Deploying JAR to Nexus'
                 sh """
                     docker run --rm \
                     -v \$WORKSPACE:/workspace \
                     -v \$HOME/.m2:/root/.m2 \
-                    -w /workspace/springboot-hello \
+                    -w /workspace \
                     ${MAVEN_IMAGE} mvn deploy -DskipTests
                 """
             }
