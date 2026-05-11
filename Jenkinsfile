@@ -25,9 +25,9 @@ pipeline {
                 echo 'Compiling Spring Boot app'
                 sh """
                     docker run --rm \
-                    -v \$PWD:/app \
+                    -v \$WORKSPACE:/workspace \
                     -v \$HOME/.m2:/root/.m2 \
-                    -w /app \
+                    -w /workspace \
                     ${MAVEN_IMAGE} mvn clean compile
                 """
             }
@@ -38,9 +38,9 @@ pipeline {
                 echo 'Running tests'
                 sh """
                     docker run --rm \
-                    -v \$PWD:/app \
+                    -v \$WORKSPACE:/workspace \
                     -v \$HOME/.m2:/root/.m2 \
-                    -w /app \
+                    -w /workspace \
                     ${MAVEN_IMAGE} mvn test
                 """
             }
@@ -51,9 +51,9 @@ pipeline {
                 echo 'Packaging JAR'
                 sh """
                     docker run --rm \
-                    -v \$PWD:/app \
+                    -v \$WORKSPACE:/workspace \
                     -v \$HOME/.m2:/root/.m2 \
-                    -w /app \
+                    -w /workspace \
                     ${MAVEN_IMAGE} mvn package -DskipTests
                 """
             }
@@ -63,10 +63,10 @@ pipeline {
             steps {
                 echo 'Building Docker image'
 
-                sh '''
+                sh """
                     docker --version
-                    docker build -t springboot-hello:latest .
-                '''
+                    docker build -t ${IMAGE_NAME}:latest .
+                """
             }
         }
 
@@ -75,9 +75,9 @@ pipeline {
                 echo 'Deploying artifact to Nexus'
                 sh """
                     docker run --rm \
-                    -v \$PWD:/app \
+                    -v \$WORKSPACE:/workspace \
                     -v \$HOME/.m2:/root/.m2 \
-                    -w /app \
+                    -w /workspace \
                     ${MAVEN_IMAGE} mvn deploy -DskipTests
                 """
             }
