@@ -15,7 +15,6 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Checking out source code from GitHub'
                 checkout scm
             }
         }
@@ -23,10 +22,9 @@ pipeline {
         stage('Debug Workspace') {
             steps {
                 sh '''
-                    echo "=== WORKSPACE INFO ==="
+                    echo "WORKSPACE:"
                     pwd
                     ls -la
-                    echo "=== FIND POM ==="
                     find . -name pom.xml
                 '''
             }
@@ -34,7 +32,6 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Compiling Spring Boot app'
                 sh """
                     docker run --rm \
                     -v \$WORKSPACE:/workspace \
@@ -47,7 +44,6 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Running tests'
                 sh """
                     docker run --rm \
                     -v \$WORKSPACE:/workspace \
@@ -60,7 +56,6 @@ pipeline {
 
         stage('Package') {
             steps {
-                echo 'Packaging JAR'
                 sh """
                     docker run --rm \
                     -v \$WORKSPACE:/workspace \
@@ -73,9 +68,8 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image'
                 sh """
-                    docker --version
+                    echo "Building Docker image..."
                     docker build -t ${IMAGE_NAME}:latest .
                 """
             }
@@ -83,7 +77,6 @@ pipeline {
 
         stage('Deploy to Nexus (Maven)') {
             steps {
-                echo 'Deploying JAR to Nexus'
                 sh """
                     docker run --rm \
                     -v \$WORKSPACE:/workspace \
